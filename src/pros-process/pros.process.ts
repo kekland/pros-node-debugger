@@ -25,11 +25,11 @@ export class PROSTerminalProcess {
   }
 
   private onOutput(data: string) {
-    Logger.log(`${data}`)
+    Logger.log(`${data}`, 'PROSTerminalProcess')
   }
 
   private onError(error: string) {
-    Logger.error(`${error}`)
+    Logger.error(`${error}`, 'PROSTerminalProcess')
   }
 
   private onClose(code: number, signal: number) {
