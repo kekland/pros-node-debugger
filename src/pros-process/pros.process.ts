@@ -6,14 +6,14 @@ export class PROSTerminalProcess {
 
   constructor() {
     this.process = spawn('prosv5', ['terminal'])
-    if(this.process.stdout != null) {
+    if (this.process.stdout != null) {
       this.process.stdout.on('data', this.onOutput)
     }
     else {
       Logger.warn('Cannot bind stdout - object is null', 'PROSTerminalProcess')
     }
 
-    if(this.process.stderr != null) {
+    if (this.process.stderr != null) {
       this.process.stderr.on('data', this.onError)
     }
     else {
@@ -34,5 +34,6 @@ export class PROSTerminalProcess {
 
   private onClose(code: number, signal: number) {
     Logger.error(`Terminal closed with code ${code} and signal ${signal}`, 'PROSTerminalProcess')
+    Logger.warn(`Check the connection between the brain and computer.`, `PROSTerminalProcess`)
   }
 }
