@@ -6,7 +6,7 @@ import * as socketio from 'socket.io';
 
 //socketio.default()
 const bootstrap = async () => {  
-  const process = new PROSTerminalProcess((data) => {
+  const process = new PROSTerminalProcess('C:/Program Files/PROS/cli/prosv5.exe', (data) => {
   })
 }
 
