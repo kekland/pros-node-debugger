@@ -8,7 +8,8 @@ export class PROSTerminalProcess {
 
   constructor(onData: (obj: object) => void) {
     console.log(process.cwd())
-    this.process = spawn('node', [process.cwd() + '/pros-terminal.js'], { shell: true, env: process.env, cwd: process.cwd(), stdio: 'pipe' })
+    this.process = spawn('node', [process.cwd() + '/pros-terminal.js'], { shell: true, env: process.env, cwd: process.cwd(), stdio: [0, 'pipe', 'pipe'] })
+
     if (this.process.stdout != null) {
       this.process.stdout.on('data', this.onOutput)
     }
