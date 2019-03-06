@@ -22,7 +22,7 @@
     "build": "rimraf dist && tsc -p tsconfig.json",
     "dev": "webpack --config webpack.config.js",
     "start:dev": "node dev/server",
-    "start:prod": "node build/server"
+    "start:prod": "node build/index"
   },
   "repository": {
     "type": "git",
