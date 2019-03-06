@@ -2,10 +2,12 @@ import { Logger } from "./logger";
 import { spawn } from 'child_process'
 import { PROSTerminalProcess } from "./pros-process/pros.process";
 import { getWelcomingMessage } from "./welcome";
+import * as socketio from 'socket.io';
 
+//socketio.default()
 const bootstrap = async () => {  
-  console.log(getWelcomingMessage())
-  
+  const process = new PROSTerminalProcess((data) => {
+  })
 }
 
 bootstrap()

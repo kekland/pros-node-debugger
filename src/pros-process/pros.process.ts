@@ -3,8 +3,9 @@ import { Logger } from "../logger";
 
 export class PROSTerminalProcess {
   private process: ChildProcess;
+  private onData: (obj: object) => void;
 
-  constructor() {
+  constructor(onData: (obj: object) => void) {
     this.process = spawn('prosv5', ['terminal'])
     if (this.process.stdout != null) {
       this.process.stdout.on('data', this.onOutput)
@@ -22,10 +23,19 @@ export class PROSTerminalProcess {
 
     this.process.on('close', this.onClose)
     Logger.log('Process launched', 'PROSTerminalProcess')
+
+    this.onData = onData
   }
 
   private onOutput(data: string) {
     Logger.log(`${data}`, 'PROSTerminalProcess')
+    try {
+      const obj = JSON.parse(data)
+      this.onData(obj)
+    }
+    catch(err) {
+      Logger.error('Cannot parse object', 'PROSTerminalProcess')
+    }
   }
 
   private onError(error: string) {
