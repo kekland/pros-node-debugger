@@ -1,12 +1,14 @@
 import { ChildProcess, spawn } from "child_process";
 import { Logger } from "../logger";
+import { Readable, Writable } from 'stream'
 
 export class PROSTerminalProcess {
   private process: ChildProcess;
   private onData: (obj: object) => void;
 
   constructor(onData: (obj: object) => void) {
-    this.process = spawn('prosv5', ['terminal'])
+    console.log(process.cwd())
+    this.process = spawn('node', [process.cwd() + '/pros-terminal.js'], { shell: true, env: process.env, cwd: process.cwd(), stdio: 'pipe' })
     if (this.process.stdout != null) {
       this.process.stdout.on('data', this.onOutput)
     }
@@ -33,7 +35,7 @@ export class PROSTerminalProcess {
       const obj = JSON.parse(data)
       this.onData(obj)
     }
-    catch(err) {
+    catch (err) {
       Logger.error('Cannot parse object', 'PROSTerminalProcess')
     }
   }
