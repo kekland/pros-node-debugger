@@ -1,13 +1,15 @@
-import { Logger } from "./logger";
 import { spawn } from 'child_process'
-import { PROSTerminalProcess } from "./pros-process/pros.process";
-import { getWelcomingMessage } from "./welcome";
-import * as socketio from 'socket.io';
+import * as socketio from 'socket.io'
+import { EnvironmentUtils } from './env/env.utils'
+import { Logger } from './logger'
+import { PROSProcess } from './pros-process/pros.process'
+import { getWelcomingMessage } from './welcome'
 
-//socketio.default()
-const bootstrap = async () => {  
-  const process = new PROSTerminalProcess('C:/Program Files/PROS/cli/prosv5.exe', (data) => {
-  })
+// socketio.default()
+const bootstrap = async () => {
+  const prosProcess = new PROSProcess((data) => Logger.log(JSON.stringify(data), 'bootstrap'),
+    EnvironmentUtils.getConfigStrict('cliLocation'),
+    EnvironmentUtils.getConfigStrict('projectLocation'))
 }
 
 bootstrap()

@@ -1,44 +1,68 @@
-import { Logger } from "../logger";
+import { IPty, spawn } from 'node-pty'
 import { Readable, Writable } from 'stream'
-import { spawn, IPty } from 'node-pty'
-export class PROSTerminalProcess {
-  private process: IPty;
-  private onData: (obj: object) => void;
+import { Logger } from '../logger'
 
-  constructor(prosExec: string, onData: (obj: object) => void) {
-    console.log(process.cwd())
-    const env = process.env
-    const envMod: {[key: string]: string} = {};
-    for(const v in env) {
-      envMod[v] = (env[v] as string)
-    }
-    this.process = spawn(`${prosExec}`, ['terminal'], {env: envMod, cwd: process.cwd()})
+export class PROSProcess {
+  private currentProcess: IPty | null
+  private prosExecutable: string
+  private prosProjectFolder: string
+  private onData: (data: object) => void
 
-    this.process.on('data', this.onOutput)
-    this.process.on('exit', this.onClose)
-
-    Logger.log('Process launched', 'PROSTerminalProcess')
-
+  constructor(onData: (data: object) => void, prosExecutableFolder: string, prosProjectFolder: string) {
+    this.currentProcess = null
+    this.prosExecutable = prosExecutableFolder
+    this.prosProjectFolder = prosProjectFolder
     this.onData = onData
   }
 
-  private onOutput(data: string) {
-    Logger.log(`${data}`, 'PROSTerminalProcess')
-    try {
-      const obj = JSON.parse(data)
-      this.onData(obj)
-    }
-    catch (err) {
-      Logger.error('Cannot parse object', 'PROSTerminalProcess')
-    }
+  public openTerminal() {
+    this.startPROSCommand(['terminal'], (data) => this.onOutput(data, true))
   }
 
-  private onError(error: string) {
-    Logger.error(`${error}`, 'PROSTerminalProcess')
+  public flash() {
+    this.startPROSCommand(['mu'], (data) => this.onOutput(data, false), (code, signal) => {
+      this.openTerminal()
+    })
+  }
+
+  private getEnv() {
+    const env = process.env
+    const envMod: { [key: string]: string } = {}
+    // tslint:disable-next-line:forin
+    for (const v in env) {
+      envMod[v] = (env[v] as string)
+    }
+    return envMod
+  }
+  private startPROSCommand(args: string[],
+                           onData: (data: string) => void,
+                           overrideOnClose?: (exitCode: number, signal: number | undefined) => void) {
+    if (this.currentProcess != null) {
+      this.currentProcess.kill()
+      this.currentProcess = null
+    }
+    this.currentProcess = spawn(this.prosExecutable, args, { cwd: this.prosProjectFolder, env: this.getEnv() })
+
+    this.currentProcess.on('data', onData)
+    this.currentProcess.on('exit', (overrideOnClose) ? overrideOnClose : this.onClose)
+  }
+
+  private onOutput(data: string, tryToParse: boolean = false) {
+    if (!tryToParse) {
+      this.onData({ type: 'message', data })
+      return
+    } else {
+      try {
+        const obj = JSON.parse(data)
+        this.onData(obj)
+      } catch (err) {
+        this.onData({ type: 'error', data: 'onOutput: Cannot parse object' })
+      }
+    }
   }
 
   private onClose(code: number, signal: number | undefined) {
-    Logger.error(`Terminal closed with code ${code} and signal ${signal}`, 'PROSTerminalProcess')
-    Logger.warn(`Check the connection between the brain and computer.`, `PROSTerminalProcess`)
+    this.onData({ type: 'error', data: `onClose: pty closed with code ${code} and signal ${signal}` })
+    this.currentProcess = null
   }
 }
