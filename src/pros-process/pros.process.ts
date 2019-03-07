@@ -1,5 +1,6 @@
 import { IPty, spawn } from 'node-pty'
 import { Readable, Writable } from 'stream'
+import stripAnsi from 'strip-ansi'
 import { Logger } from '../logger'
 
 export class PROSProcess {
@@ -7,6 +8,7 @@ export class PROSProcess {
   private prosExecutable: string
   private prosProjectFolder: string
   private onData: (data: object) => void
+  private buffer: string = ''
 
   constructor(onData: (data: object) => void, prosExecutableFolder: string, prosProjectFolder: string) {
     this.currentProcess = null
@@ -21,8 +23,16 @@ export class PROSProcess {
 
   public flash() {
     this.startPROSCommand(['mu'], (data) => this.onOutput(data, false), (code, signal) => {
+      this.currentProcess = null
       this.openTerminal()
     })
+  }
+
+  private fixData(incData: string): string {
+    let data = stripAnsi(incData)
+    data = data.replace('\n', '')
+    data = data.replace('\r', '')
+    return data
   }
 
   private getEnv() {
@@ -34,35 +44,40 @@ export class PROSProcess {
     }
     return envMod
   }
+
   private startPROSCommand(args: string[],
                            onData: (data: string) => void,
-                           overrideOnClose?: (exitCode: number, signal: number | undefined) => void) {
+                           overrideOnExit?: (exitCode: number, signal: number | undefined) => void) {
     if (this.currentProcess != null) {
       this.currentProcess.kill()
       this.currentProcess = null
     }
-    this.currentProcess = spawn(this.prosExecutable, args, { cwd: this.prosProjectFolder, env: this.getEnv() })
+    this.currentProcess = spawn(this.prosExecutable, args,
+      { cwd: this.prosProjectFolder, env: this.getEnv(), cols: 10000 })
 
     this.currentProcess.on('data', onData)
-    this.currentProcess.on('exit', (overrideOnClose) ? overrideOnClose : this.onClose)
+    this.currentProcess.on('exit', (overrideOnExit) ? overrideOnExit : (code, signal) => this.onExit(code, signal))
   }
 
-  private onOutput(data: string, tryToParse: boolean = false) {
+  private onOutput(incomingData: string, tryToParse: boolean = false) {
+    const data = this.fixData(incomingData)
+    if (data.length < 5) {
+      return
+    }
     if (!tryToParse) {
       this.onData({ type: 'message', data })
-      return
     } else {
       try {
         const obj = JSON.parse(data)
         this.onData(obj)
       } catch (err) {
-        this.onData({ type: 'error', data: 'onOutput: Cannot parse object' })
+        this.onData({ type: 'message', data, meta: { cannotParse: true } })
       }
     }
   }
 
-  private onClose(code: number, signal: number | undefined) {
-    this.onData({ type: 'error', data: `onClose: pty closed with code ${code} and signal ${signal}` })
+  private onExit(code: number, signal: number | undefined) {
+    this.onData({ type: 'error', data: `onExit: pty closed with code ${code} and signal ${signal}` })
     this.currentProcess = null
   }
 }

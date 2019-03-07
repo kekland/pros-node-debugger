@@ -7,9 +7,17 @@ import { getWelcomingMessage } from './welcome'
 
 // socketio.default()
 const bootstrap = async () => {
-  const prosProcess = new PROSProcess((data) => Logger.log(JSON.stringify(data), 'bootstrap'),
-    EnvironmentUtils.getConfigStrict('cliLocation'),
-    EnvironmentUtils.getConfigStrict('projectLocation'))
+  const prosProcess = new PROSProcess((data: any) => {
+    if (data.type === 'error') {
+      Logger.error(data.data, 'prosProcess')
+    } else {
+      Logger.log(JSON.stringify(data), 'prosProcess')
+    }
+  },
+  EnvironmentUtils.getConfigStrict('cliLocation'),
+  EnvironmentUtils.getConfigStrict('projectLocation'))
+
+  prosProcess.flash()
 }
 
 bootstrap()
