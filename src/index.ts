@@ -16,6 +16,7 @@ const bootstrap = async () => {
       if (prosProcess.isFlashing) {
         return
       }
+      Logger.log('Starting to flash')
       prosProcess.flash()
     })
   })
