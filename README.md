@@ -9,7 +9,7 @@ A TypeScript server for **PROS v5** and [**pros-node-debugger-library**](https:/
 
 ### Prerequisites
 
-- **PROS for V5** installed on your machine or on Raspberry Pi attached to the brain.
+- [**PROS for V5**](https://pros.cs.purdue.edu/) installed on where you will host the server (either your PC or Raspberry Pi attached to the brain).
 
 ### Copy the repository
 
