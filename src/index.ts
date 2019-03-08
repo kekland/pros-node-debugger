@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import * as http from 'http'
 import * as socketio from 'socket.io'
 import { EnvironmentUtils } from './env/env.utils'
 import { Logger } from './logger'
@@ -7,17 +8,26 @@ import { getWelcomingMessage } from './welcome'
 
 // socketio.default()
 const bootstrap = async () => {
-  const prosProcess = new PROSProcess((data: any) => {
-    if (data.type === 'error') {
-      Logger.error(data.data, 'prosProcess')
-    } else {
-      Logger.log(JSON.stringify(data), 'prosProcess')
-    }
-  },
-  EnvironmentUtils.getConfigStrict('cliLocation'),
-  EnvironmentUtils.getConfigStrict('projectLocation'))
+  const socketServer = socketio.listen(8078)
+  socketServer.on('connection', (socket) => {
+    Logger.log(`New connection: ${socket.id}`, 'socketServer')
 
-  prosProcess.flash()
+    socket.on('flash', () => {
+      if (prosProcess.isFlashing) {
+        return
+      }
+      prosProcess.flash()
+    })
+  })
+  Logger.log(`Running socket.io server on port ${8078}`, 'bootstrap')
+
+  const prosProcess = new PROSProcess((data: any) => {
+    socketServer.emit('data', data)
+  },
+    EnvironmentUtils.getConfigStrict('cliLocation'),
+    EnvironmentUtils.getConfigStrict('projectLocation'))
+
+  prosProcess.openTerminal()
 }
 
 bootstrap()

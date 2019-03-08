@@ -4,6 +4,7 @@ import stripAnsi from 'strip-ansi'
 import { Logger } from '../logger'
 
 export class PROSProcess {
+  public isFlashing: boolean
   private currentProcess: IPty | null
   private prosExecutable: string
   private prosProjectFolder: string
@@ -15,6 +16,7 @@ export class PROSProcess {
     this.prosExecutable = prosExecutableFolder
     this.prosProjectFolder = prosProjectFolder
     this.onData = onData
+    this.isFlashing = false
   }
 
   public openTerminal() {
@@ -22,8 +24,10 @@ export class PROSProcess {
   }
 
   public flash() {
+    this.isFlashing = true
     this.startPROSCommand(['mu'], (data) => this.onOutput(data, false), (code, signal) => {
       this.currentProcess = null
+      this.isFlashing = false
       this.openTerminal()
     })
   }
