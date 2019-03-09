@@ -1,0 +1,52 @@
+{
+  "namespace": "App",
+  "fsNamespace": "app",
+  "loader": "../app.js",
+  "global": "app.global.js",
+  "core": "app.n3gvyuvl.js",
+  "corePolyfilled": "app.tvqlpcik.js",
+  "components": {
+    "app-root": {
+      "bundleIds": {
+        "$": "ntca550u"
+      },
+      "encapsulation": "shadow"
+    },
+    "card-object": {
+      "bundleIds": {
+        "$": "vlc9jawg"
+      },
+      "encapsulation": "shadow"
+    },
+    "data-item": {
+      "bundleIds": {
+        "$": "vlc9jawg"
+      },
+      "encapsulation": "shadow"
+    },
+    "messages-component": {
+      "bundleIds": {
+        "$": "ntca550u"
+      },
+      "encapsulation": "shadow"
+    },
+    "motor-component": {
+      "bundleIds": {
+        "$": "vlc9jawg"
+      },
+      "encapsulation": "shadow"
+    },
+    "value-unit-display": {
+      "bundleIds": {
+        "$": "vlc9jawg"
+      },
+      "encapsulation": "shadow"
+    },
+    "x-component": {
+      "bundleIds": {
+        "$": "kcpzs09u"
+      },
+      "encapsulation": "shadow"
+    }
+  }
+}

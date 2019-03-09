@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import * as express from 'express'
 import * as http from 'http'
 import * as socketio from 'socket.io'
 import { EnvironmentUtils } from './env/env.utils'
@@ -8,6 +9,9 @@ import { getWelcomingMessage } from './welcome'
 
 // socketio.default()
 const bootstrap = async () => {
+  const expressServer = express.default()
+  expressServer.use(express.static('www'))
+  expressServer.listen(8080)
   const socketServer = socketio.listen(8078)
   socketServer.on('connection', (socket) => {
     Logger.log(`New connection: ${socket.id}`, 'socketServer')
@@ -20,7 +24,7 @@ const bootstrap = async () => {
       prosProcess.flash()
     })
   })
-  Logger.log(`Running socket.io server on port ${8078}`, 'bootstrap')
+  Logger.log(`Running socket.io server on port ${8078}, express server on port ${8080}`, 'bootstrap')
 
   const prosProcess = new PROSProcess((data: any) => {
     socketServer.emit('data', data)
